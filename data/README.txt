@@ -3,10 +3,11 @@ For each dataset, is provided a general description and the details for each ass
 
 #nestling_condition.csv
 A csv table related to the analyses of nestling body condition and parasite load (pre-analyses).
-Consist of 8 variables
+Consist of 9 variables
 
 - year: character; from 2004 to 2021; year corresponding to measurements and parasite load quantification
-- nestbox: character; nestbox identity coined from the study site ("pir" or "tua") and nestbox number
+- nestbox_born: character; nestbox identity coined from the study site ("pir" or "tua") and nestbox number; correspond to the nestbox where the nestling was laid
+- nestbox_raised: character; nestbox identity coined from the study site ("pir" or "tua") and nestbox number; correspond to the nestbox where the nestling was raised and fledged. Should be equal to nestbox_born since we discarded rows with cross-fostering experiments
 - ind_id: character; individual identity
 - par_load: integer; parasite load for the whole brood
 - nestling: integer; number of hatchlings in the brood
