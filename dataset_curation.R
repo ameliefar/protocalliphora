@@ -40,11 +40,10 @@ data_cond <- chick %>%
                 par_load = as.integer(proto),
                 nestling = as.numeric(pulecl),
                 year = as.character(an.x),
-                nestbox_born = paste(lieu.y, nic.y, sep = ""), # create nestbox identity where the egg wais laid
-                nestbox_raised = paste(lieu.x, nic.x, sep = ""), # create nestbox identity where the nestling was raised (to detect cross-fostered individuals)
+                nestbox = paste(lieu.x, nic.x, sep = ""),
                 relative_par_load = round(par_load/nestling, digits = 2)) %>% # parasite load per nestling
-  dplyr::select(year, nestbox_born, nestbox_raised, ind_id, par_load, nestling, relative_par_load, tarsus, mass) 
+  dplyr::select(year, nestbox, ind_id, par_load, nestling, relative_par_load, tarsus, mass) 
 
 
-write.csv(data_cond, paste0(data_path, "/nestling_condition.csv"))
+write.csv(data_cond, paste0(data_path, "/nestling_condition.csv"), row.names = FALSE)
 
