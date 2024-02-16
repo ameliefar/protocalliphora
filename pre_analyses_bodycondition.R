@@ -152,7 +152,7 @@ ggplot(as.data.frame(bc_predict),
                        aesthetics = c("colour", "fill"), 
                        breaks = moderator_values, 
                        limits = range(moderator_values), 
-                       labels = c("1", "", "6.5", "", "11")) +
+                       labels = c("1", "5", "6.5", "8", "11")) +
   labs(color = "Number of\nhatchlings", fill = "Number of\nhatchlings", title = "" , x = "Relative parasite load", y = "Nestling mass (g)") +
   theme(text = element_text(family = "Times New Roman"),
         plot.title = element_text(size = 14, face = "bold", vjust = 0.8, hjust = 0.5),
