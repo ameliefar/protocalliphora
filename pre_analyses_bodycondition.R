@@ -1,9 +1,10 @@
 #'Pre-analyses to test correlations between parasite load and nestling body condition
 #'
 #'Load packages
+library(tidyverse)
 library(lme4)
-library(merTools)
 library(parameters)
+library(extrafont)
 
 #'Load dataset
 data_cond <- read.csv("data/nestling_condition.csv") %>% 
@@ -83,81 +84,93 @@ tars_tab <- tars_tab %>%
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(tars_mod),
                                           TRUE ~ NA_integer_))
 
-# Merge both data tables together
-all_tab <- dplyr::bind_rows(dplyr::mutate(mass_tab, to_explain = "mass"),
-                            dplyr::mutate(tars_tab, to_explain = "tarsus"))
+# Create a table enabling the creation of the forest plot
+
+all_tab <- dplyr::bind_rows(dplyr::mutate(mass_tab, exp_var = "mass"), # Add column to include variables to explain
+                           dplyr::mutate(tars_tab, exp_var = "tarsus")) %>% 
+  dplyr::filter(term != "(Intercept)" & effect != "ran_pars") %>% # Remove intercepts and random effects values
+  dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
+  dplyr::select(exp_var, term, estimate, low95ci, up95ci) # Reduce table width to the needed columns
+
+
 #Figures
 #'Create a forest plot to display the outputs of the tests
-#'
-plot <- ggplot(all_tab, aes(x = term, y = estimate, ymin = low95ci, ymax = up95ci)) +
-  geom_pointrange(size = 0.75, shape = 21) +
+#' extrafont::font_import() 
+#' extrafont::loadfonts(device = "win") (code to run to extend the number of available fonts - take time so I added #' to avoid running it everytime)
+bodycond_fp <- ggplot(all_tab, aes(x = term, y = estimate, ymin = low95ci, ymax = up95ci)) +
+  geom_pointrange(size = 1, linewidth = 1, shape = "¤") +
   coord_flip() +
   labs(title = "" , x = "", y = "") +
-  geom_hline(yintercept = 0, color = "black", linetype = "dashed", linewidth = 0.5) +
+  scale_x_discrete(label = c("Number of hatchlings", "Relative parasite load", "Interaction between\nrelative parasite load\nand number of hatchlings"))  +
+  scale_y_continuous(limits = c(-0.20, 0.20), breaks = c(-0.10,  0, 0.10), label = c("-0.10", "0", "0.10")) +
+  geom_hline(yintercept = 0, color = "black", linetype = "dashed", linewidth = 0.1) +
   guides(color = "none", fill = "none") +
-  facet_wrap(. ~ to_explain, 
-             nrow = 1, 
-             ncol = 2, 
-             labeller = labeller(to_explain = c("mass" = "Nestling mass (g)", "tarsus" = "Nestling tarsus length (mm)")))
-
-
-
-theme(plot.margin = margin(t = 0.25, b = 0.25, l = 0.25, r = 20),
-      text = element_text(family = "Times"),
-      plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-      axis.text.x = element_text(size = 10, face = "bold", color = "black", hjust = 0.5),
-      axis.text.y = element_text(size = 16, face = "bold", color = text, hjust = 0),
-      axis.title = element_text(size = 16, face = "bold", color = "black"),
-      axis.ticks.y = element_blank(),
-      panel.spacing.x = unit(3, "lines"),
-      panel.spacing.y = unit(1.5, "lines"),
-      panel.background = element_blank(),
-      panel.grid.major.y = element_blank(),
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor = element_blank(),
-      strip.background = element_blank(),
-      strip.text = element_text(size = 12, face = "bold", color = "black"),
-      axis.line.x = element_line(colour = "black", linewidth = 1, linetype = "solid"),
-      axis.line.y = element_blank()) +
-  #Laying date
-ld_pl = filter(es_pl, lht == "ld")
-
-
-font_add("Times", regular = "times.ttf")
-
-text <- c(rep("black", 4), "#D55E00", "white", rep(c(rep("black", 4), "#009E73", "white"), 2), rep("black", 4), "#009E73")
-size = c(rep(c(rep(12, 4), 20, 2), 3), rep(12, 4), 20)
-
-
-ld_pl_plot<- ggplot(ld_pl, aes(x = pop_col, y = estimate, ymin = low, ymax = up, color = pop_col, fill = pop_col)) +
-  geom_pointrange(size = 0.75, shape = 21) +
-  coord_flip() +
-  labs(title = "" , x = "", y="") +
-  scale_y_continuous(limits = c(-0.06, 0.06), breaks = c(-0.05, -0.025, 0, 0.025, 0.05), label = c("-0.05", "-0.025", "0", "0.025", "0.05")) +
-  scale_x_discrete(label = c("Yellow chroma", "Mean brightness", "UV chroma", "Mean brightness", "D-Rouvière", "", "Yellow chroma", "Mean brightness", "UV chroma", "Mean brightness", "E-Pirio", "", "Yellow chroma", "Mean brightness", "UV chroma", "Mean brightness", "E-Muro", "", "Yellow chroma", "Mean brightness", "UV chroma", "Mean brightness", "D-Muro"))  +
-  scale_color_manual(values = c("darkorange", "darkorange", "royalblue", "royalblue", "white", "white", "darkorange", "darkorange", "royalblue", "royalblue", "white", "white", "darkorange", "darkorange", "royalblue", "royalblue", "white", "white", "darkorange", "darkorange", "royalblue", "royalblue", "white")) +
-  scale_fill_manual(values = c("darkorange", "darkorange", "royalblue", "royalblue", "white", "white", "darkorange", "darkorange", "royalblue", "royalblue", "white", "white", "darkorange", "darkorange", "royalblue", "royalblue", "white", "white", "darkorange", "darkorange", "royalblue", "royalblue", "white")) +
-  geom_hline(yintercept = 0, color = "black", linetype = "dashed", size = 0.5) +
   theme(plot.margin = margin(t = 0.25, b = 0.25, l = 0.25, r = 20),
-        text = element_text(family = "Times"),
-        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-        axis.text.x = element_text(size = 10, face = "bold", color = "black", hjust = 0.5),
-        axis.text.y = element_text(size = size, face = "bold", color = text, hjust = 0),
-        axis.title = element_text(size = 16, face = "bold", color = "black"),
+        text = element_text(family = "Times New Roman"),
         axis.ticks.y = element_blank(),
+        axis.line.x = element_line(colour = "black", linewidth = 1, linetype = "solid"),
+        axis.line.y = element_blank(),
         panel.spacing.x = unit(3, "lines"),
         panel.spacing.y = unit(1.5, "lines"),
         panel.background = element_blank(),
+        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
         panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_blank(),
         panel.grid.minor = element_blank(),
+        axis.title = element_text(size = 16, face = "bold", color = "black"),
         strip.background = element_blank(),
         strip.text = element_text(size = 12, face = "bold", color = "black"),
-        axis.line.x = element_line(colour = "black", size = 1, linetype = "solid"),
-        axis.line.y = element_blank()) +
-  guides(color = "none", fill = "none") +
-  facet_wrap(.~trait, nrow = 4, ncol = 5, labeller = labeller(trait = c("bf" = "Female linear\nestimate", "gf" = "Female quadratic\nestimate", "bm" = "Male linear\nestimate", "gm" = "Male quadratic\nestimate", "bmf" = "Interaction between\nmale and female color")))
-save_plot("C:/Users/FARGEVIEILLE/Desktop/SelectionGradients_Updated_to2021/ForestPlots/ld_pl.png", ld_pl_plot, ncol = 1, nrow = 1, base_height = 12, base_width = 15)
-ggsave("C:/Users/FARGEVIEILLE/Desktop/SelectionGradients_Updated_to2021/ForestPlots/ld_pl.pdf", plot = ld_pl_plot, 
-       device = cairo_pdf,
-       width = 15, height = 12, dpi = 300) 
+        axis.text.x = element_text(size = 10, face = "bold", color = "black", hjust = 0.5),
+        axis.text.y = element_text(size = 12, face = "bold", color = "black", hjust = 0)) +
+  facet_wrap(. ~ exp_var, 
+             nrow = 1, 
+             ncol = 2, 
+             labeller = labeller(exp_var = c("mass" = "Nestling mass (g)", "tarsus" = "Nestling tarsus length (mm)")))
+bodycond_fp
+
+# Plot displaying results from model on mass
+bc_predict = ggeffects::ggpredict(mass_mod, terms = c("relative_par_load", "nestling")) 
+
+  
+moderator_values <- sort(c(as.numeric(as.character(unique(bc_predict$group))),
+                           range(c(attr(bc_predict, "rawdata")$group, 
+                                   as.numeric(as.character(unique(bc_predict$group)))))))
+  
+ggplot(as.data.frame(bc_predict), 
+       aes(x = x, y = predicted, 
+           group = group, 
+           color = as.numeric(as.character(group)), 
+           fill = as.numeric(as.character(group)))) +
+  geom_point(data = attr(bc_predict, "rawdata"), 
+               aes(x = jitter(x),
+                   y = jitter(response)),
+               alpha = 0.6) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), color = FALSE, alpha = 0.2) +
+  geom_line() +
+  scale_color_gradient(low = "white",
+                       high = "black",
+                       aesthetics = c("colour", "fill"), 
+                       breaks = moderator_values, 
+                       limits = range(moderator_values), 
+                       labels = c("1", "", "6.5", "", "11")) +
+  labs(color = "Number of\nhatchlings", fill = "Number of\nhatchlings", title = "" , x = "Relative parasite load", y = "Nestling mass (g)") +
+  theme(text = element_text(family = "Times New Roman"),
+        plot.title = element_text(size = 14, face = "bold", vjust = 0.8, hjust = 0.5),
+        panel.background = element_rect(fill = "transparent", colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor =element_blank(),
+        axis.title.x = element_text(size = 12, face = "bold"),
+        axis.title.y = element_text(size = 12, face = "bold"),
+        axis.text = element_text(size = 10, face = "bold", color = "black"),
+        legend.position = c(0.85, 0.72),
+        legend.box = "horizontal",
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+        legend.justification = c(0.3, 0.15),
+        legend.title.align = 1,
+        legend.text = element_text(size = 10, face = "bold"),
+        legend.title = element_text(size = 12, face = "bold"),
+        strip.background = element_rect(linetype = "solid", color = "black", size = 1, fill = "grey95"))
+  
+
+
