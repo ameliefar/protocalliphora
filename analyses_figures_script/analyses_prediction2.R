@@ -289,19 +289,19 @@ cowplot::save_plot("figures/fig3.jpg", plot_ad, ncol = 1, nrow = 1, base_height 
 
 
 # Plot displaying results from model on mean brightness from the blue crown
-bba_predict = ggeffects::ggpredict(bba_mod, terms = c("relative_par_load", "hatch_size")) 
+bb_hatch_predict = ggeffects::ggpredict(bba_mod, terms = c("relative_par_load", "hatch_size")) 
 
 
-moderator_values <- sort(c(as.numeric(as.character(unique(bba_predict$group))),
-                           range(c(attr(bba_predict, "rawdata")$group, 
-                                   as.numeric(as.character(unique(bba_predict$group)))))))
+moderator_values <- sort(c(as.numeric(as.character(unique(bb_hatch_predict$group))),
+                           range(c(attr(bb_hatch_predict, "rawdata")$group, 
+                                   as.numeric(as.character(unique(bb_hatch_predict$group)))))))
 
-bba_lm <- ggplot(as.data.frame(bba_predict), 
+bb_hatch_lm <- ggplot(as.data.frame(bb_hatch_predict), 
                       aes(x = x, y = predicted, 
                           group = group, 
                           color = as.numeric(as.character(group)), 
                           fill = as.numeric(as.character(group)))) +
-  geom_point(data = attr(bba_predict, "rawdata"), 
+  geom_point(data = attr(bb_hatch_predict, "rawdata"), 
              aes(x = jitter(x),
                  y = jitter(response)),
              alpha = 0.6,
@@ -312,9 +312,9 @@ bba_lm <- ggplot(as.data.frame(bba_predict),
   scale_color_gradient(low = "white",
                        high = "black",
                        aesthetics = c("colour", "fill"), 
-                       breaks = c("2", "4", "6", "8", "10"), #Issue displaying labels for hatching size
+                       breaks = c("2", "6", "10"), #Issue displaying labels for hatching size
                        limits = range(moderator_values), 
-                       labels = c("2", "4", "6", "8", "10")) +
+                       labels = c("2", "6",  "10")) +
   labs(color = "Number of\nhatchlings", fill = "Number of\nhatchlings", title = "" , x = "Relative parasite load", y = "Mean brightness from the blue crown") +
   theme(text = element_text(family = "Noto Sans"),
         plot.title = element_text(size = 14, face = "bold", vjust = 0.8, hjust = 0.5),
@@ -335,3 +335,25 @@ bba_lm <- ggplot(as.data.frame(bba_predict),
         legend.text = element_text(size = 10, face = "bold"),
         legend.title = element_text(size = 12, face = "bold"),
         strip.background = element_blank())
+
+
+bb_sex_predict = ggeffects::ggpredict(bba_mod, terms = c("relative_par_load", "sex")) 
+
+
+moderator_values <- sort(c(as.numeric(as.character(unique(bb_sex_predict$group))),
+                           range(c(attr(bb_sex_predict, "rawdata")$group, 
+                                   as.numeric(as.character(unique(bb_sex_predict$group)))))))
+
+bb_sex_lm <- ggplot(as.data.frame(bb_sex_predict), 
+                      aes(x = x, y = predicted, 
+                          group = group, 
+                          color = as.numeric(as.character(group)), 
+                          fill = as.numeric(as.character(group)))) +
+  geom_point(data = attr(bb_sex_predict, "rawdata"), 
+             aes(x = jitter(x),
+                 y = jitter(response)),
+             alpha = 0.6,
+             shape = 16,
+             size = 0.8) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), color = FALSE, alpha = 0.2) +
+  geom_line() 
