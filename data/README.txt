@@ -37,3 +37,25 @@ csv table with 13 variables and 130 observations
 - YUVC: real; color variable corresponding to UV-chroma from the yellow breast patch
 - YC: real; color variable corresponding to yellow chroma from the yellow breast patch
 
+#adult_color.csv
+A csv table gathering the dataset for the analyses relating plumage colour of breeders to the parasite load of their brood the previous year
+csv table with 14 variables and 551 observations
+
+- indID: character; individual identity;
+- sex: character; two possible values: 
+	- "M" for male
+	- "F" for female
+- min_age: integer; minimum age of the bird (age in year 2 when sampling feathers); varies from 2 to 8
+- broodID: character; nestbox from year 1 (when quantifying parasite load); coined from study site ("pir" or "tua") and nestbox number; 
+- year: character; from 2004 to 2021; corresponds to "year 1" when quantifying parasite load
+- hatch_size: integer; number of hatchlings in the brood (from year 1);
+- par_load: integer; parasite load for the whole brood (from year 1);
+- relative_par_load: real; ratio of parasite load in the brood divided by number of hatchlings in the brood;
+- spl_period: character; period of feather collection; two possible values:
+	- "C" indicates feathers were collected when potential breeders start constructing nests, in early spring;
+	- "F" indicates feathers were collected when breeders feeding (10 to 15 days old) nestlings, later in spring
+- BB: real; color variable corresponding to mean brightness from the blue crown
+- BUVC: real; color variable corresponding to UV-chroma from the blue crown
+- YB: real; color variable corresponding to mean brightness from the yellow breast patch
+- YUVC: real; color variable corresponding to UV-chroma from the yellow breast patch
+- YC: real; color variable corresponding to yellow chroma from the yellow breast patch
