@@ -17,7 +17,7 @@ csv table with 8 variables and 3263 observations
 
 #recruit_color.csv
 A csv table gathering the dataset for the analyses relating plumage colour as a first year breeder to parasite load as a nestling
-csv table with 13 variables and 161 observations
+csv table with 13 variables and 130 observations
 
 - indID: character; individual identity;
 - sex: character; two possible values: 
