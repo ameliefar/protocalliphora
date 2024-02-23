@@ -11,12 +11,12 @@ data_cond <- read.csv("data/nestling_condition.csv") %>%
   dplyr::mutate(year = as.character(year))
 
 #'Testing correlation among explanatory variables and covariables
-cor.test(data_cond$par_load, data_cond$nestling, method = "pearson") #simple correlation test across the whole dataset
+cor.test(data_cond$par_load, data_cond$hatch_size, method = "pearson") #simple correlation test across the whole dataset
 data_cor <- data_cond %>% 
   tidyr::nest(.by = year) %>% # Nest data by year
   dplyr::mutate(model = lapply(data,
                                function(df)
-                                 cor.test(df$par_load, df$nestling, method = "pearson") %>% 
+                                 cor.test(df$par_load, df$hatch_size, method = "pearson") %>% 
                                  broom::tidy())) %>% # Allow to test correlation within year
   dplyr::select(-(data)) %>%  # Keep columns associated with correlation tests only 
   tidyr::unnest(cols = c(model))  # Display as a data frame with one row for each year
@@ -24,7 +24,7 @@ data_cor <- data_cond %>%
 
 #'Building models
 #'Model with nestling mass
-mass_mod <- lme4::lmer(mass ~ relative_par_load * nestling + (1|year) + (1|nestbox), data = data_cond) #model
+mass_mod <- lme4::lmer(mass ~ relative_par_load * hatch_size + (1|year) + (1|broodID), data = data_cond) #model
 
 mass_tab <- broom.mixed::tidy(mass_mod) # Extract estimates, statistics for fixed effects, as well as standard-deviation for random effects
 mass_confint <- as.data.frame(stats::confint(mass_mod)) %>% # Estimate 95% confidence intervals for fixed and random effects
@@ -33,21 +33,21 @@ mass_tab <- mass_tab %>%
   # Add confidence intervals to the data table summarizing results related to the model
   dplyr::mutate(low95ci = dplyr::case_when(term == "(Intercept)" ~ mass_confint[4, 1], 
                                            term == "relative_par_load" ~ mass_confint[5, 1],
-                                           term == "nestling" ~ mass_confint[6, 1],
-                                           term == "relative_par_load:nestling" ~ mass_confint[7, 1],
-                                           group == "nestbox" ~ mass_confint[1, 1],
+                                           term == "hatch_size" ~ mass_confint[6, 1],
+                                           term == "relative_par_load:hatch_size" ~ mass_confint[7, 1],
+                                           group == "broodID" ~ mass_confint[1, 1],
                                            group == "year" ~ mass_confint[2, 1],
                                            group == "Residual" ~ mass_confint[3, 1],
                                            TRUE ~ NA_real_),
                 up95ci = dplyr::case_when(term == "(Intercept)" ~ mass_confint[4, 2],
                                           term == "relative_par_load" ~ mass_confint[5, 2],
-                                          term == "nestling" ~ mass_confint[6, 2],
-                                          term == "relative_par_load:nestling" ~ mass_confint[7, 2],
-                                          group == "nestbox" ~ mass_confint[1, 2],
+                                          term == "hatch_size" ~ mass_confint[6, 2],
+                                          term == "relative_par_load:hatch_size" ~ mass_confint[7, 2],
+                                          group == "brooodID" ~ mass_confint[1, 2],
                                           group == "year" ~ mass_confint[2, 2],
                                           group == "Residual" ~ mass_confint[3, 2],
                                           TRUE ~ NA_real_),
-                nb_groups = dplyr::case_when(group == "nestbox" ~ lme4::ngrps(mass_mod)[1],
+                nb_groups = dplyr::case_when(group == "broodID" ~ lme4::ngrps(mass_mod)[1],
                                              group == "year" ~ lme4::ngrps(mass_mod)[2],
                                              TRUE ~ NA_integer_),
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(mass_mod),
@@ -55,7 +55,7 @@ mass_tab <- mass_tab %>%
 
 
 #'Model with nestling tarsus length
-tars_mod <- lme4::lmer(tarsus ~ relative_par_load * nestling + (1|year) + (1|nestbox), data = data_cond) #model
+tars_mod <- lme4::lmer(tarsus ~ relative_par_load * hatch_size + (1|year) + (1|broodID), data = data_cond) #model
 
 tars_tab <- broom.mixed::tidy(tars_mod) # Extract estimates, statistics for fixed effects, as well as standard-deviation for random effects
 tars_confint <- as.data.frame(stats::confint(tars_mod)) %>% # Estimate 95% confidence intervals for fixed and random effects
@@ -64,21 +64,21 @@ tars_tab <- tars_tab %>%
   # Add confidence intervals to the data table summarizing results related to the model
   dplyr::mutate(low95ci = dplyr::case_when(term == "(Intercept)" ~ tars_confint[4, 1], 
                                            term == "relative_par_load" ~ tars_confint[5, 1],
-                                           term == "nestling" ~ tars_confint[6, 1],
-                                           term == "relative_par_load:nestling" ~ tars_confint[7, 1],
-                                           group == "nestbox" ~ tars_confint[1, 1],
+                                           term == "hatch_size" ~ tars_confint[6, 1],
+                                           term == "relative_par_load:hatch_size" ~ tars_confint[7, 1],
+                                           group == "broodID" ~ tars_confint[1, 1],
                                            group == "year" ~ tars_confint[2, 1],
                                            group == "Residual" ~ tars_confint[3, 1],
                                            TRUE ~ NA_real_),
                 up95ci = dplyr::case_when(term == "(Intercept)" ~ tars_confint[4, 2],
                                           term == "relative_par_load" ~ tars_confint[5, 2],
-                                          term == "nestling" ~ tars_confint[6, 2],
-                                          term == "relative_par_load:nestling" ~ tars_confint[7, 2],
-                                          group == "nestbox" ~ tars_confint[1, 2],
+                                          term == "hatch_size" ~ tars_confint[6, 2],
+                                          term == "relative_par_load:hatch_size" ~ tars_confint[7, 2],
+                                          group == "broodID" ~ tars_confint[1, 2],
                                           group == "year" ~ tars_confint[2, 2],
                                           group == "Residual" ~ tars_confint[3, 2],
                                           TRUE ~ NA_real_),
-                nb_groups = dplyr::case_when(group == "nestbox" ~ lme4::ngrps(tars_mod)[1],
+                nb_groups = dplyr::case_when(group == "broodID" ~ lme4::ngrps(tars_mod)[1],
                                              group == "year" ~ lme4::ngrps(tars_mod)[2],
                                              TRUE ~ NA_integer_),
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(tars_mod),
@@ -129,7 +129,7 @@ bodycond_fp <- ggplot(all_tab, aes(x = term, y = estimate, ymin = low95ci, ymax 
 bodycond_fp
 
 # Plot displaying results from model on mass
-bc_predict = ggeffects::ggpredict(mass_mod, terms = c("relative_par_load", "nestling")) 
+bc_predict = ggeffects::ggpredict(mass_mod, terms = c("relative_par_load", "hatch_size")) 
 
   
 moderator_values <- sort(c(as.numeric(as.character(unique(bc_predict$group))),
@@ -173,7 +173,7 @@ bodycond_lm <- ggplot(as.data.frame(bc_predict),
         legend.title.align = 1,
         legend.text = element_text(size = 10, face = "bold"),
         legend.title = element_text(size = 12, face = "bold"),
-        strip.background = element_rect(linetype = "solid", color = "black", size = 1, fill = "grey95"))
+        strip.background = element_rect(linetype = "solid", color = "black", linewidth = 1, fill = "grey95"))
 
 # Assembling plots to form "Figure 1"
 plot_bc = cowplot::ggdraw() +
