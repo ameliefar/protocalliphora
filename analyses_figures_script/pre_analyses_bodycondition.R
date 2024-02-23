@@ -51,7 +51,8 @@ mass_tab <- mass_tab %>%
                                              group == "year" ~ lme4::ngrps(mass_mod)[2],
                                              TRUE ~ NA_integer_),
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(mass_mod),
-                                          TRUE ~ NA_integer_))
+                                          TRUE ~ NA_integer_),
+                exp_var = "mass")
 
 
 #'Model with nestling tarsus length
@@ -82,12 +83,12 @@ tars_tab <- tars_tab %>%
                                              group == "year" ~ lme4::ngrps(tars_mod)[2],
                                              TRUE ~ NA_integer_),
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(tars_mod),
-                                          TRUE ~ NA_integer_))
+                                          TRUE ~ NA_integer_), 
+                exp_var = "tarsus")
 
 # Create a table enabling the creation of the forest plot
 
-all_tab <- dplyr::bind_rows(dplyr::mutate(mass_tab, exp_var = "mass"), # Add column to include variables to explain
-                           dplyr::mutate(tars_tab, exp_var = "tarsus")) %>% 
+all_tab <- dplyr::bind_rows(mass_tab, tars_tab) %>% 
   dplyr::filter(term != "(Intercept)" & effect != "ran_pars") %>% # Remove intercepts and random effects values
   dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
   dplyr::select(exp_var, term, estimate, low95ci, up95ci) # Reduce table width to the needed columns
@@ -106,13 +107,14 @@ bodycond_fp <- ggplot(all_tab, aes(x = term, y = estimate, ymin = low95ci, ymax 
   geom_hline(yintercept = 0, color = "black", linetype = "dashed", linewidth = 0.4) +
   guides(color = "none", fill = "none") +
   theme(plot.margin = margin(t = 0.25, b = 0.25, l = 0.25, r = 20),
+        plot.background = element_rect(fill = "ghostwhite"),
         text = element_text(family = "Noto Sans"),
         axis.ticks.y = element_blank(),
         axis.line.x = element_line(colour = "black", linewidth = 1, linetype = "solid"),
         axis.line.y = element_blank(),
         panel.spacing.x = unit(3, "lines"),
         panel.spacing.y = unit(1.5, "lines"),
-        panel.background = element_blank(),
+        panel.background = element_rect(fill = "ghostwhite"),
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
         panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_blank(),
@@ -158,7 +160,8 @@ bodycond_lm <- ggplot(as.data.frame(bc_predict),
   labs(color = "Number of\nhatchlings", fill = "Number of\nhatchlings", title = "" , x = "Relative parasite load", y = "Nestling mass (g)") +
   theme(text = element_text(family = "Noto Sans"),
         plot.title = element_text(size = 14, face = "bold", vjust = 0.8, hjust = 0.5),
-        panel.background = element_blank(),
+        plot.background = element_rect(fill = "ghostwhite"),
+        panel.background = element_rect(fill = "ghostwhite"),
         panel.grid.major = element_blank(),
         panel.grid.minor =element_blank(),
         axis.line = element_line(colour = "black", linewidth = 1, linetype = "solid"),
@@ -173,12 +176,12 @@ bodycond_lm <- ggplot(as.data.frame(bc_predict),
         legend.title.align = 1,
         legend.text = element_text(size = 10, face = "bold"),
         legend.title = element_text(size = 12, face = "bold"),
-        strip.background = element_rect(linetype = "solid", color = "black", linewidth = 1, fill = "grey95"))
+        strip.background = element_blank())
 
 # Assembling plots to form "Figure 1"
-plot_bc = cowplot::ggdraw() +
+plot_bc = cowplot::ggdraw() + 
+  theme(plot.background = element_rect(fill = "ghostwhite", color = NA)) +
   cowplot::draw_plot(bodycond_fp, x = 0, y = 0.15, hjust = 0, width = 0.45, height = 0.8) +
   cowplot::draw_plot(bodycond_lm, x = 0.55, y = 0.15, hjust = 0, width = 0.35, height = 0.7)  +
-  cowplot::draw_line(x = c(.52, .52), y = c(0, 1), color = "black", linetype = "solid", linewidth = 1.5) +
   cowplot::draw_plot_label(label = c("(a)", "(b)"), x = c(0, 0.55), y = c(0.96, 0.96),  hjust = 0, family = "Noto Sans", size = 14)
 cowplot::save_plot("figures/fig1.jpg", plot_bc, ncol = 1, nrow = 1, base_height = 8, base_width = 18)
