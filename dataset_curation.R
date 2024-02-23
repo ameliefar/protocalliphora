@@ -78,6 +78,10 @@ recruit <- dplyr::left_join(sub_col, sub_brood, by = c("ring")) %>% # Merge subs
                 hatch_size = as.numeric(pulecl),
                 relative_par_load = round(par_load/hatch_size, digits = 2)) %>% 
   dplyr::filter(!is.na(sex)) %>% # remove individuals with uncertainty on sex (possible when capture outside of reproduction)
-  dplyr::select(indID, sex, broodID, year, hatch_size, par_load, relative_par_load, period, BB, BUVC, YB, YUVC, YC)
+  dplyr::select(indID, sex, broodID, year, hatch_size, par_load, relative_par_load, period, BB, BUVC, YB, YUVC, YC) %>% 
+  dplyr::arrange(year, indID, period) %>% 
+  dplyr::group_by(indID) %>% 
+  dplyr::slice(1) %>% # remove duplicates for birds (feather) sampled twice. The function "arrange" above allows to keep the first sample for the analyses
+  dplyr::ungroup()
   
 write.csv(recruit, paste0(data_path, "/recruit_color.csv"), row.names = FALSE)
