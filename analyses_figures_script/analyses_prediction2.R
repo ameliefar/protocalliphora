@@ -357,3 +357,6 @@ bb_sex_lm <- ggplot(as.data.frame(bb_sex_predict),
              size = 0.8) +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high), color = FALSE, alpha = 0.2) +
   geom_line() 
+
+
+
