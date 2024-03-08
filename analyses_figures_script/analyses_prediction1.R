@@ -260,7 +260,3 @@ cowplot::save_plot("figures/fig2.jpg", plot_rec, ncol = 1, nrow = 1, base_height
 
 
 
-
-rec_tab <- dplyr::bind_rows(bbr_tab, buvcr_tab, ybr_tab, yuvcr_tab, ycr_tab) %>% 
-  dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
-  dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
