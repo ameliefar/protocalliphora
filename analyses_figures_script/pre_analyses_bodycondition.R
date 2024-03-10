@@ -45,7 +45,7 @@ mass_tab <- mass_tab %>%
                                           term == "relative_par_load" ~ mass_confint[5, 2],
                                           term == "hatch_size" ~ mass_confint[6, 2],
                                           term == "relative_par_load:hatch_size" ~ mass_confint[7, 2],
-                                          group == "brooodID" ~ mass_confint[1, 2],
+                                          group == "broodID" ~ mass_confint[1, 2],
                                           group == "year" ~ mass_confint[2, 2],
                                           group == "Residual" ~ mass_confint[3, 2],
                                           TRUE ~ NA_real_),
@@ -186,16 +186,33 @@ plot_bc <- cowplot::ggdraw() +
   cowplot::draw_plot(bodycond_fp, x = 0, y = 0.15, hjust = 0, width = 0.45, height = 0.8) +
   cowplot::draw_plot(bodycond_lm, x = 0.55, y = 0.15, hjust = 0, width = 0.35, height = 0.7)  +
   cowplot::draw_plot_label(label = c("(a)", "(b)"), x = c(0, 0.55), y = c(0.96, 0.96),  hjust = 0, family = "Noto Sans", size = 14)
-cowplot::save_plot("figures/fig1.jpg", plot_bc, ncol = 1, nrow = 1, base_height = 8, base_width = 18)
+cowplot::save_plot("figures/not_standardized/fig1.jpg", plot_bc, ncol = 1, nrow = 1, base_height = 8, base_width = 18)
 
 
-# Using standardized data
+
+## ~~~~~~ WITH STANDARDIZED DATA
+#Data manipulation to add standardized data (centered (substracting the column mean) and scaled (dividing centered value by sd))
 data_cond_sd <- data_cond %>% 
-  dplyr::mutate(across(4:8, ~ scale(.)[,1]))
+  dplyr::mutate(across(c(4:5, 7:8), ~ scale(.)[,1])) %>% 
+  dplyr::left_join(dplyr::select(data_cond, 
+                                 c("indID", "year", "hatch_size", "par_load", "relative_par_load", "tarsus", "mass")), 
+                   by = c("indID", "year")) %>% 
+  dplyr::select(indID, broodID, year,
+                hatch_size = "hatch_size.y",
+                sd_hatch_size = "hatch_size.x",
+                par_load = "par_load.y",
+                sd_par_load = "par_load.x",
+                relative_par_load = "relative_par_load.y",
+                sd_relative_par_load = "relative_par_load.x",
+                tarsus = "tarsus.y",
+                sd_tarsus = "tarsus.x",
+                mass = "mass.y",
+                sd_mass = "mass.x")
+                
 
 #'Building models
 #'Model with nestling mass
-mass_mod_sd <- lme4::lmer(mass ~ relative_par_load * hatch_size + (1|year) + (1|broodID), data = data_cond_sd) #model
+mass_mod_sd <- lme4::lmer(sd_mass ~ sd_relative_par_load * sd_hatch_size + (1|year) + (1|broodID), data = data_cond_sd) #model
 
 mass_tab_sd <- broom.mixed::tidy(mass_mod_sd) # Extract estimates, statistics for fixed effects, as well as standard-deviation for random effects
 mass_confint_sd <- as.data.frame(stats::confint(mass_mod_sd)) %>% # Estimate 95% confidence intervals for fixed and random effects
@@ -203,18 +220,18 @@ mass_confint_sd <- as.data.frame(stats::confint(mass_mod_sd)) %>% # Estimate 95%
 mass_tab_sd <- mass_tab_sd %>% 
   # Add confidence intervals to the data table summarizing results related to the model
   dplyr::mutate(low95ci = dplyr::case_when(term == "(Intercept)" ~ mass_confint_sd[4, 1], 
-                                           term == "relative_par_load" ~ mass_confint_sd[5, 1],
-                                           term == "hatch_size" ~ mass_confint_sd[6, 1],
-                                           term == "relative_par_load:hatch_size" ~ mass_confint_sd[7, 1],
+                                           term == "sd_relative_par_load" ~ mass_confint_sd[5, 1],
+                                           term == "sd_hatch_size" ~ mass_confint_sd[6, 1],
+                                           term == "sd_relative_par_load:sd_hatch_size" ~ mass_confint_sd[7, 1],
                                            group == "broodID" ~ mass_confint_sd[1, 1],
                                            group == "year" ~ mass_confint_sd[2, 1],
                                            group == "Residual" ~ mass_confint_sd[3, 1],
                                            TRUE ~ NA_real_),
                 up95ci = dplyr::case_when(term == "(Intercept)" ~ mass_confint_sd[4, 2],
-                                          term == "relative_par_load" ~ mass_confint_sd[5, 2],
-                                          term == "hatch_size" ~ mass_confint_sd[6, 2],
-                                          term == "relative_par_load:hatch_size" ~ mass_confint_sd[7, 2],
-                                          group == "brooodID" ~ mass_confint_sd[1, 2],
+                                          term == "sd_relative_par_load" ~ mass_confint_sd[5, 2],
+                                          term == "sd_hatch_size" ~ mass_confint_sd[6, 2],
+                                          term == "sd_relative_par_load:sd_hatch_size" ~ mass_confint_sd[7, 2],
+                                          group == "broodID" ~ mass_confint_sd[1, 2],
                                           group == "year" ~ mass_confint_sd[2, 2],
                                           group == "Residual" ~ mass_confint_sd[3, 2],
                                           TRUE ~ NA_real_),
@@ -227,7 +244,7 @@ mass_tab_sd <- mass_tab_sd %>%
 
 
 #'Model with nestling tarsus length
-tars_mod_sd <- lme4::lmer(tarsus ~ relative_par_load * hatch_size + (1|year) + (1|broodID), data = data_cond_sd) #model
+tars_mod_sd <- lme4::lmer(sd_tarsus ~ sd_relative_par_load * sd_hatch_size + (1|year) + (1|broodID), data = data_cond_sd) #model
 
 tars_tab_sd <- broom.mixed::tidy(tars_mod_sd) # Extract estimates, statistics for fixed effects, as well as standard-deviation for random effects
 tars_confint_sd <- as.data.frame(stats::confint(tars_mod_sd)) %>% # Estimate 95% confidence intervals for fixed and random effects
@@ -235,17 +252,17 @@ tars_confint_sd <- as.data.frame(stats::confint(tars_mod_sd)) %>% # Estimate 95%
 tars_tab_sd <- tars_tab_sd %>% 
   # Add confidence intervals to the data table summarizing results related to the model
   dplyr::mutate(low95ci = dplyr::case_when(term == "(Intercept)" ~ tars_confint_sd[4, 1], 
-                                           term == "relative_par_load" ~ tars_confint_sd[5, 1],
-                                           term == "hatch_size" ~ tars_confint_sd[6, 1],
-                                           term == "relative_par_load:hatch_size" ~ tars_confint_sd[7, 1],
+                                           term == "sd_relative_par_load" ~ tars_confint_sd[5, 1],
+                                           term == "sd_hatch_size" ~ tars_confint_sd[6, 1],
+                                           term == "sd_relative_par_load:sd_hatch_size" ~ tars_confint_sd[7, 1],
                                            group == "broodID" ~ tars_confint_sd[1, 1],
                                            group == "year" ~ tars_confint_sd[2, 1],
                                            group == "Residual" ~ tars_confint_sd[3, 1],
                                            TRUE ~ NA_real_),
                 up95ci = dplyr::case_when(term == "(Intercept)" ~ tars_confint_sd[4, 2],
-                                          term == "relative_par_load" ~ tars_confint_sd[5, 2],
-                                          term == "hatch_size" ~ tars_confint_sd[6, 2],
-                                          term == "relative_par_load:hatch_size" ~ tars_confint_sd[7, 2],
+                                          term == "sd_relative_par_load" ~ tars_confint_sd[5, 2],
+                                          term == "sd_hatch_size" ~ tars_confint_sd[6, 2],
+                                          term == "sd_relative_par_load:sd_hatch_size" ~ tars_confint_sd[7, 2],
                                           group == "broodID" ~ tars_confint_sd[1, 2],
                                           group == "year" ~ tars_confint_sd[2, 2],
                                           group == "Residual" ~ tars_confint_sd[3, 2],
@@ -264,7 +281,7 @@ all_tab_sd <- dplyr::bind_rows(mass_tab_sd, tars_tab_sd) %>%
   dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
   dplyr::select(exp_var, term, estimate, low95ci, up95ci) # Reduce table width to the needed columns
 
-all_tab_sd$term <- factor(all_tab_sd$term, c("(Intercept)", "relative_par_load", "hatch_size", "relative_par_load:hatch_size"))
+all_tab_sd$term <- factor(all_tab_sd$term, c("(Intercept)", "sd_relative_par_load", "sd_hatch_size", "sd_relative_par_load:sd_hatch_size"))
 
 #Figures
 #'Create a forest plot to display the outputs of the tests
@@ -304,7 +321,7 @@ bodycond_fp_sd
 
 
 # Plot displaying results from model on mass
-bc_predict_sd = ggeffects::ggpredict(mass_mod_sd, terms = c("relative_par_load", "hatch_size")) 
+bc_predict_sd = ggeffects::ggpredict(mass_mod_sd, terms = c("sd_relative_par_load", "sd_hatch_size")) 
 
 
 moderator_values_sd <- sort(c(as.numeric(as.character(unique(bc_predict_sd$group))),
@@ -324,7 +341,6 @@ bodycond_lm_sd <- ggplot(as.data.frame(bc_predict_sd),
              size = 0.8) +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high), color = FALSE, alpha = 0.2) +
   geom_line() +
-  scale_x_continuous(limits = c(-1.457642, 4.923553), )
   scale_color_gradient(low = "white",
                        high = "black",
                        aesthetics = c("colour", "fill"), 
@@ -358,18 +374,21 @@ plot_bc_sd <- cowplot::ggdraw() +
   cowplot::draw_plot(bodycond_fp_sd, x = 0, y = 0.15, hjust = 0, width = 0.45, height = 0.8) +
   cowplot::draw_plot(bodycond_lm_sd, x = 0.55, y = 0.15, hjust = 0, width = 0.35, height = 0.7)  +
   cowplot::draw_plot_label(label = c("(a)", "(b)"), x = c(0, 0.55), y = c(0.96, 0.96),  hjust = 0, family = "Noto Sans", size = 14)
-cowplot::save_plot("figures/fig1_sd.jpg", plot_bc_sd, ncol = 1, nrow = 1, base_height = 8, base_width = 18)
+cowplot::save_plot("figures/standardized/fig1_sd.jpg", plot_bc_sd, ncol = 1, nrow = 1, base_height = 8, base_width = 18)
 
 
 #Printing outputs from models (unscaled and scaled)
+name <- c("model", "effect", "term", "estimate", "std_error", "t_value", "95CI_low", "95CI_up", "group", "nb_groups", "nb_obs")
 ##Unscaled
 all_tab <- dplyr::bind_rows(mass_tab, tars_tab) %>% 
-  dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
-  dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
-write.csv(all_tab, "output_tables/output_preanalyses_unsc.csv", row.names = FALSE)
+  dplyr::mutate_at(vars(estimate, std.error, statistic, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
+  dplyr::select(exp_var, effect, term, estimate, std.error, statistic, low95ci, up95ci, group, nb_obs, nb_groups) # Reduce table width to the needed columns
+colnames(all_tab) <- name
+write.csv(all_tab, "output_tables/output_preanalyses_unst.csv", row.names = FALSE)
 
 ##Standardized (scaled)
 all_tab_sd <- dplyr::bind_rows(mass_tab_sd, tars_tab_sd) %>% 
-  dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
-  dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
-write.csv(all_tab_sd, "output_tables/output_preanalyses_sc.csv", row.names = FALSE)
+  dplyr::mutate_at(vars(estimate, std.error, statistic, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
+  dplyr::select(exp_var, effect, term, estimate, std.error, statistic, low95ci, up95ci, group, nb_obs, nb_groups) # Reduce table width to the needed columns
+colnames(all_tab_sd) <- name
+write.csv(all_tab_sd, "output_tables/output_preanalyses_st.csv", row.names = FALSE)

@@ -256,48 +256,64 @@ plot_rec <- cowplot::ggdraw() +
   cowplot::draw_line(x = c(0.2, 0.38), y = c(0.93, 0.93), linewidth = 1, color = "black") +
   cowplot::draw_text("Yellow breast patch", x = 0.75, y = 0.96, size = 14, fontface = "bold", family = "Noto Sans", color = "darkorange") +
   cowplot::draw_line(x = c(0.55, 0.9), y = c(0.93, 0.93), linewidth = 1, color = "black")
-cowplot::save_plot("figures/fig2.jpg", plot_rec, ncol = 1, nrow = 1, base_height = 6, base_width = 18)
+cowplot::save_plot("figures/not_standardized/fig2.jpg", plot_rec, ncol = 1, nrow = 1, base_height = 6, base_width = 18)
 
 
 
 
-rec_tab <- dplyr::bind_rows(bbr_tab, buvcr_tab, ybr_tab, yuvcr_tab, ycr_tab) %>% 
-  dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
-  dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
-
-
-#####STANDARDIZED#####
-#With standardized data
+## ~~~~~~ WITH STANDARDIZED DATA
+#Data manipulation to add standardized data (centered (substracting the column mean) and scaled (dividing centered value by sd))
 recruit_sd <- recruit %>% 
-  dplyr::mutate(across(c(5:7, 9:13), ~ scale(.)[,1]))
+  dplyr::mutate(across(c(5:7, 9:13), ~ scale(.)[,1])) %>% 
+  dplyr::left_join(dplyr::select(recruit, 
+                                 c("indID", "year", "hatch_size", "par_load", "relative_par_load", "BB", "BUVC", "YB", "YUVC", "YC")), 
+                   by = c("indID", "year")) %>% 
+  dplyr::select(indID, broodID, year, sex, period,
+                hatch_size = "hatch_size.y",
+                sd_hatch_size = "hatch_size.x",
+                par_load = "par_load.y",
+                sd_par_load = "par_load.x",
+                relative_par_load = "relative_par_load.y",
+                sd_relative_par_load = "relative_par_load.x",
+                BB = "BB.y",
+                sd_BB = "BB.x",
+                BUVC = "BUVC.y",
+                sd_BUVC = "BUVC.x",
+                YB = "YB.y",
+                sd_YB = "YB.x",
+                YUVC = "YUVC.y",
+                sd_YUVC = "YUVC.x",
+                YC = "YC.y",
+                sd_YC = "YC.x")
+
 
 
 #'Building models
 #'Mean brightness from the blue crown
-bbr_mod_sd <- lme4::lmer(BB ~ relative_par_load * hatch_size + relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
+bbr_mod_sd <- lme4::lmer(sd_BB ~ sd_relative_par_load * sd_hatch_size + sd_relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
 bbr_tab_sd <- broom.mixed::tidy(bbr_mod_sd) # Extract estimates, statistics for fixed effects, as well as standard-deviation for random effects
 bbr_confint_sd <- as.data.frame(stats::confint(bbr_mod_sd)) %>% # Estimate 95% confidence intervals for fixed and random effects
   dplyr::rename("low95ci" = '2.5 %', "up95ci" = '97.5 %')
 bbr_tab_sd <- bbr_tab_sd %>% 
   # Add confidence intervals to the data table summarizing results related to the model
   dplyr::mutate(low95ci = dplyr::case_when(term == "(Intercept)" ~ bbr_confint_sd[4, 1], 
-                                           term == "relative_par_load" ~ bbr_confint_sd[5, 1],
-                                           term == "hatch_size" ~ bbr_confint_sd[6, 1],
+                                           term == "sd_relative_par_load" ~ bbr_confint_sd[5, 1],
+                                           term == "sd_hatch_size" ~ bbr_confint_sd[6, 1],
                                            term == "sexM" ~ bbr_confint_sd[7, 1],
                                            term == "periodF" ~ bbr_confint_sd[8, 1],
-                                           term == "relative_par_load:hatch_size" ~ bbr_confint_sd[9, 1],
-                                           term == "relative_par_load:sexM" ~ bbr_confint_sd[10, 1],
+                                           term == "sd_relative_par_load:sd_hatch_size" ~ bbr_confint_sd[9, 1],
+                                           term == "sd_relative_par_load:sexM" ~ bbr_confint_sd[10, 1],
                                            group == "broodID" ~ bbr_confint_sd[1, 1],
                                            group == "year" ~ bbr_confint_sd[2, 1],
                                            group == "Residual" ~ bbr_confint_sd[3, 1],
                                            TRUE ~ NA_real_),
                 up95ci = dplyr::case_when(term == "(Intercept)" ~ bbr_confint_sd[4, 2], 
-                                          term == "relative_par_load" ~ bbr_confint_sd[5, 2],
-                                          term == "hatch_size" ~ bbr_confint_sd[6, 2],
+                                          term == "sd_relative_par_load" ~ bbr_confint_sd[5, 2],
+                                          term == "sd_hatch_size" ~ bbr_confint_sd[6, 2],
                                           term == "sexM" ~ bbr_confint_sd[7, 2],
                                           term == "periodF" ~ bbr_confint_sd[8, 2],
-                                          term == "relative_par_load:hatch_size" ~ bbr_confint_sd[9, 2],
-                                          term == "relative_par_load:sexM" ~ bbr_confint_sd[10, 2],
+                                          term == "sd_relative_par_load:sd_hatch_size" ~ bbr_confint_sd[9, 2],
+                                          term == "sd_relative_par_load:sexM" ~ bbr_confint_sd[10, 2],
                                           group == "broodID" ~ bbr_confint_sd[1, 2],
                                           group == "year" ~ bbr_confint_sd[2, 2],
                                           group == "Residual" ~ bbr_confint_sd[3, 2],
@@ -307,33 +323,33 @@ bbr_tab_sd <- bbr_tab_sd %>%
                                              TRUE ~ NA_integer_),
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(bbr_mod_sd),
                                           TRUE ~ NA_integer_),
-                exp_var = "BB")
+                exp_var = "BB_sd")
 
 #'UV-chroma from the blue crown
-buvcr_mod_sd <- lme4::lmer(BUVC ~ relative_par_load * hatch_size + relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
+buvcr_mod_sd <- lme4::lmer(sd_BUVC ~ sd_relative_par_load * sd_hatch_size + sd_relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
 buvcr_tab_sd <- broom.mixed::tidy(buvcr_mod_sd) # Extract estimates, statistics for fixed effects, as well as standard-deviation for random effects
 buvcr_confint_sd <- as.data.frame(stats::confint(buvcr_mod_sd)) %>% # Estimate 95% confidence intervals for fixed and random effects
   dplyr::rename("low95ci" = '2.5 %', "up95ci" = '97.5 %')
 buvcr_tab_sd <- buvcr_tab_sd %>% 
   # Add confidence intervals to the data table summarizing results related to the model
   dplyr::mutate(low95ci = dplyr::case_when(term == "(Intercept)" ~ buvcr_confint_sd[4, 1], 
-                                           term == "relative_par_load" ~ buvcr_confint_sd[5, 1],
-                                           term == "hatch_size" ~ buvcr_confint_sd[6, 1],
+                                           term == "sd_relative_par_load" ~ buvcr_confint_sd[5, 1],
+                                           term == "sd_hatch_size" ~ buvcr_confint_sd[6, 1],
                                            term == "sexM" ~ buvcr_confint_sd[7, 1],
                                            term == "periodF" ~ buvcr_confint_sd[8, 1],
-                                           term == "relative_par_load:hatch_size" ~ buvcr_confint_sd[9, 1],
-                                           term == "relative_par_load:sexM" ~ buvcr_confint_sd[10, 1],
+                                           term == "sd_relative_par_load:sd_hatch_size" ~ buvcr_confint_sd[9, 1],
+                                           term == "sd_relative_par_load:sexM" ~ buvcr_confint_sd[10, 1],
                                            group == "broodID" ~ buvcr_confint_sd[1, 1],
                                            group == "year" ~ buvcr_confint_sd[2, 1],
                                            group == "Residual" ~ buvcr_confint_sd[3, 1],
                                            TRUE ~ NA_real_),
                 up95ci = dplyr::case_when(term == "(Intercept)" ~ buvcr_confint_sd[4, 2], 
-                                          term == "relative_par_load" ~ buvcr_confint_sd[5, 2],
-                                          term == "hatch_size" ~ buvcr_confint_sd[6, 2],
+                                          term == "sd_relative_par_load" ~ buvcr_confint_sd[5, 2],
+                                          term == "sd_hatch_size" ~ buvcr_confint_sd[6, 2],
                                           term == "sexM" ~ buvcr_confint_sd[7, 2],
                                           term == "periodF" ~ buvcr_confint_sd[8, 2],
-                                          term == "relative_par_load:hatch_size" ~ buvcr_confint_sd[9, 2],
-                                          term == "relative_par_load:sexM" ~ buvcr_confint_sd[10, 2],
+                                          term == "sd_relative_par_load:sd_hatch_size" ~ buvcr_confint_sd[9, 2],
+                                          term == "sd_relative_par_load:sexM" ~ buvcr_confint_sd[10, 2],
                                           group == "broodID" ~ buvcr_confint_sd[1, 2],
                                           group == "year" ~ buvcr_confint_sd[2, 2],
                                           group == "Residual" ~ buvcr_confint_sd[3, 2],
@@ -343,34 +359,34 @@ buvcr_tab_sd <- buvcr_tab_sd %>%
                                              TRUE ~ NA_integer_),
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(buvcr_mod_sd),
                                           TRUE ~ NA_integer_),
-                exp_var = "BUVC")
+                exp_var = "BUVC_sd")
 
 
 #'Mean brightness from the yellow breast patch
-ybr_mod_sd <- lme4::lmer(YB ~ relative_par_load * hatch_size + relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
+ybr_mod_sd <- lme4::lmer(sd_YB ~ sd_relative_par_load * sd_hatch_size + sd_relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
 ybr_tab_sd <- broom.mixed::tidy(ybr_mod_sd) # Extract estimates, statistics for fixed effects, as well as standard-deviation for random effects
 ybr_confint_sd <- as.data.frame(stats::confint(ybr_mod_sd)) %>% # Estimate 95% confidence intervals for fixed and random effects
   dplyr::rename("low95ci" = '2.5 %', "up95ci" = '97.5 %')
 ybr_tab_sd <- ybr_tab_sd %>% 
   # Add confidence intervals to the data table summarizing results related to the model
   dplyr::mutate(low95ci = dplyr::case_when(term == "(Intercept)" ~ ybr_confint_sd[4, 1], 
-                                           term == "relative_par_load" ~ ybr_confint_sd[5, 1],
-                                           term == "hatch_size" ~ ybr_confint_sd[6, 1],
+                                           term == "sd_relative_par_load" ~ ybr_confint_sd[5, 1],
+                                           term == "sd_hatch_size" ~ ybr_confint_sd[6, 1],
                                            term == "sexM" ~ ybr_confint_sd[7, 1],
                                            term == "periodF" ~ ybr_confint_sd[8, 1],
-                                           term == "relative_par_load:hatch_size" ~ ybr_confint_sd[9, 1],
-                                           term == "relative_par_load:sexM" ~ ybr_confint_sd[10, 1],
+                                           term == "sd_relative_par_load:sd_hatch_size" ~ ybr_confint_sd[9, 1],
+                                           term == "sd_relative_par_load:sexM" ~ ybr_confint_sd[10, 1],
                                            group == "broodID" ~ ybr_confint_sd[1, 1],
                                            group == "year" ~ ybr_confint_sd[2, 1],
                                            group == "Residual" ~ ybr_confint_sd[3, 1],
                                            TRUE ~ NA_real_),
                 up95ci = dplyr::case_when(term == "(Intercept)" ~ ybr_confint_sd[4, 2], 
-                                          term == "relative_par_load" ~ ybr_confint_sd[5, 2],
-                                          term == "hatch_size" ~ ybr_confint_sd[6, 2],
+                                          term == "sd_relative_par_load" ~ ybr_confint_sd[5, 2],
+                                          term == "sd_hatch_size" ~ ybr_confint_sd[6, 2],
                                           term == "sexM" ~ ybr_confint_sd[7, 2],
                                           term == "periodF" ~ ybr_confint_sd[8, 2],
-                                          term == "relative_par_load:hatch_size" ~ ybr_confint_sd[9, 2],
-                                          term == "relative_par_load:sexM" ~ ybr_confint_sd[10, 2],
+                                          term == "sd_relative_par_load:sd_hatch_size" ~ ybr_confint_sd[9, 2],
+                                          term == "sd_relative_par_load:sexM" ~ ybr_confint_sd[10, 2],
                                           group == "broodID" ~ ybr_confint_sd[1, 2],
                                           group == "year" ~ ybr_confint_sd[2, 2],
                                           group == "Residual" ~ ybr_confint_sd[3, 2],
@@ -380,33 +396,33 @@ ybr_tab_sd <- ybr_tab_sd %>%
                                              TRUE ~ NA_integer_),
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(ybr_mod_sd),
                                           TRUE ~ NA_integer_),
-                exp_var = "YB")
+                exp_var = "YB_sd")
 
 #'UV-chroma from the yellow breast patch
-yuvcr_mod_sd <- lme4::lmer(YUVC ~ relative_par_load * hatch_size + relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
+yuvcr_mod_sd <- lme4::lmer(sd_YUVC ~ sd_relative_par_load * sd_hatch_size + sd_relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
 yuvcr_tab_sd <- broom.mixed::tidy(yuvcr_mod_sd) # Extract estimates, statistics for fixed effects, as well as standard-deviation for random effects
 yuvcr_confint_sd <- as.data.frame(stats::confint(yuvcr_mod_sd)) %>% # Estimate 95% confidence intervals for fixed and random effects
   dplyr::rename("low95ci" = '2.5 %', "up95ci" = '97.5 %')
 yuvcr_tab_sd <- yuvcr_tab_sd %>% 
   # Add confidence intervals to the data table summarizing results related to the model
   dplyr::mutate(low95ci = dplyr::case_when(term == "(Intercept)" ~ yuvcr_confint_sd[4, 1], 
-                                           term == "relative_par_load" ~ yuvcr_confint_sd[5, 1],
-                                           term == "hatch_size" ~ yuvcr_confint_sd[6, 1],
+                                           term == "sd_relative_par_load" ~ yuvcr_confint_sd[5, 1],
+                                           term == "sd_hatch_size" ~ yuvcr_confint_sd[6, 1],
                                            term == "sexM" ~ yuvcr_confint_sd[7, 1],
                                            term == "periodF" ~ yuvcr_confint_sd[8, 1],
-                                           term == "relative_par_load:hatch_size" ~ yuvcr_confint_sd[9, 1],
-                                           term == "relative_par_load:sexM" ~ yuvcr_confint_sd[10, 1],
+                                           term == "sd_relative_par_load:sd_hatch_size" ~ yuvcr_confint_sd[9, 1],
+                                           term == "sd_relative_par_load:sexM" ~ yuvcr_confint_sd[10, 1],
                                            group == "broodID" ~ yuvcr_confint_sd[1, 1],
                                            group == "year" ~ yuvcr_confint_sd[2, 1],
                                            group == "Residual" ~ yuvcr_confint_sd[3, 1],
                                            TRUE ~ NA_real_),
                 up95ci = dplyr::case_when(term == "(Intercept)" ~ yuvcr_confint_sd[4, 2], 
-                                          term == "relative_par_load" ~ yuvcr_confint_sd[5, 2],
-                                          term == "hatch_size" ~ yuvcr_confint_sd[6, 2],
+                                          term == "sd_relative_par_load" ~ yuvcr_confint_sd[5, 2],
+                                          term == "sd_hatch_size" ~ yuvcr_confint_sd[6, 2],
                                           term == "sexM" ~ yuvcr_confint_sd[7, 2],
                                           term == "periodF" ~ yuvcr_confint_sd[8, 2],
-                                          term == "relative_par_load:hatch_size" ~ yuvcr_confint_sd[9, 2],
-                                          term == "relative_par_load:sexM" ~ yuvcr_confint_sd[10, 2],
+                                          term == "sd_relative_par_load:sd_hatch_size" ~ yuvcr_confint_sd[9, 2],
+                                          term == "sd_relative_par_load:sexM" ~ yuvcr_confint_sd[10, 2],
                                           group == "broodID" ~ yuvcr_confint_sd[1, 2],
                                           group == "year" ~ yuvcr_confint_sd[2, 2],
                                           group == "Residual" ~ yuvcr_confint_sd[3, 2],
@@ -416,33 +432,33 @@ yuvcr_tab_sd <- yuvcr_tab_sd %>%
                                              TRUE ~ NA_integer_),
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(yuvcr_mod_sd),
                                           TRUE ~ NA_integer_),
-                exp_var = "YUVC")
+                exp_var = "YUVC_sd")
 
 #'Yellow chroma from the yellow breast patch
-ycr_mod_sd <- lme4::lmer(YC ~ relative_par_load * hatch_size + relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
+ycr_mod_sd <- lme4::lmer(sd_YC ~ sd_relative_par_load * sd_hatch_size + sd_relative_par_load * sex + period + (1|year) + (1|broodID), data = recruit_sd)
 ycr_tab_sd <- broom.mixed::tidy(ycr_mod_sd) # Extract estimates, statistics for fixed effects, as well as standard-deviation for random effects
 ycr_confint_sd <- as.data.frame(stats::confint(ycr_mod_sd)) %>% # Estimate 95% confidence intervals for fixed and random effects
   dplyr::rename("low95ci" = '2.5 %', "up95ci" = '97.5 %')
 ycr_tab_sd <- ycr_tab_sd %>% 
   # Add confidence intervals to the data table summarizing results related to the model
   dplyr::mutate(low95ci = dplyr::case_when(term == "(Intercept)" ~ ycr_confint_sd[4, 1], 
-                                           term == "relative_par_load" ~ ycr_confint_sd[5, 1],
-                                           term == "hatch_size" ~ ycr_confint_sd[6, 1],
+                                           term == "sd_relative_par_load" ~ ycr_confint_sd[5, 1],
+                                           term == "sd_hatch_size" ~ ycr_confint_sd[6, 1],
                                            term == "sexM" ~ ycr_confint_sd[7, 1],
                                            term == "periodF" ~ ycr_confint_sd[8, 1],
-                                           term == "relative_par_load:hatch_size" ~ ycr_confint_sd[9, 1],
-                                           term == "relative_par_load:sexM" ~ ycr_confint_sd[10, 1],
+                                           term == "sd_relative_par_load:sd_hatch_size" ~ ycr_confint_sd[9, 1],
+                                           term == "sd_relative_par_load:sexM" ~ ycr_confint_sd[10, 1],
                                            group == "broodID" ~ ycr_confint_sd[1, 1],
                                            group == "year" ~ ycr_confint_sd[2, 1],
                                            group == "Residual" ~ ycr_confint_sd[3, 1],
                                            TRUE ~ NA_real_),
                 up95ci = dplyr::case_when(term == "(Intercept)" ~ ycr_confint_sd[4, 2], 
-                                          term == "relative_par_load" ~ ycr_confint_sd[5, 2],
-                                          term == "hatch_size" ~ ycr_confint_sd[6, 2],
+                                          term == "sd_relative_par_load" ~ ycr_confint_sd[5, 2],
+                                          term == "sd_hatch_size" ~ ycr_confint_sd[6, 2],
                                           term == "sexM" ~ ycr_confint_sd[7, 2],
                                           term == "periodF" ~ ycr_confint_sd[8, 2],
-                                          term == "relative_par_load:hatch_size" ~ ycr_confint_sd[9, 2],
-                                          term == "relative_par_load:sexM" ~ ycr_confint_sd[10, 2],
+                                          term == "sd_relative_par_load:sd_hatch_size" ~ ycr_confint_sd[9, 2],
+                                          term == "sd_relative_par_load:sexM" ~ ycr_confint_sd[10, 2],
                                           group == "broodID" ~ ycr_confint_sd[1, 2],
                                           group == "year" ~ ycr_confint_sd[2, 2],
                                           group == "Residual" ~ ycr_confint_sd[3, 2],
@@ -452,7 +468,7 @@ ycr_tab_sd <- ycr_tab_sd %>%
                                              TRUE ~ NA_integer_),
                 nb_obs = dplyr::case_when(group == "Residual" ~ stats::nobs(ycr_mod_sd),
                                           TRUE ~ NA_integer_),
-                exp_var = "YC")
+                exp_var = "YC_sd")
 
 
 #'Group all tables together for forestplot purposes
@@ -463,9 +479,9 @@ rec_tab_sd <- dplyr::bind_rows(bbr_tab_sd, buvcr_tab_sd, ybr_tab_sd, yuvcr_tab_s
 
 
 #'Order and level factors to organize the forest plot
-rec_tab_sd$exp_var <- factor(rec_tab_sd$exp_var, c("BB", "BUVC", "YB", "YUVC", "YC"))
-rec_tab_sd$term <- factor(rec_tab_sd$term, c("relative_par_load:hatch_size", "hatch_size", "relative_par_load:sexM",
-                                       "relative_par_load", "periodF", "sexM", "(Intercept)"))
+rec_tab_sd$exp_var <- factor(rec_tab_sd$exp_var, c("BB_sd", "BUVC_sd", "YB_sd", "YUVC_sd", "YC_sd"))
+rec_tab_sd$term <- factor(rec_tab_sd$term, c("sd_relative_par_load:sd_hatch_size", "sd_hatch_size", "sd_relative_par_load:sexM",
+                                       "sd_relative_par_load", "periodF", "sexM", "(Intercept)"))
 
 color_scheme <- c(rep("royalblue", 2), rep("darkorange", 3))
 
@@ -503,8 +519,8 @@ rec_fp_sd <- ggplot(rec_tab_sd, aes(x = term, y = estimate, ymin = low95ci, ymax
              nrow = 1, 
              ncol = 5, 
              scales = "free_x",
-             labeller = labeller(exp_var = c("BB" = "Mean brightness", "BUVC" = "UV-chroma",
-                                             "YB" = "Mean brightness", "YUVC" = "UV-chroma", "YC" = "Yellow chroma"))) 
+             labeller = labeller(exp_var = c("BB_sd" = "Mean brightness", "BUVC_sd" = "UV-chroma",
+                                             "YB_sd" = "Mean brightness", "YUVC_sd" = "UV-chroma", "YC_sd" = "Yellow chroma"))) 
 rec_fp_sd
 
 # Additional text to form "Figure 2"
@@ -514,13 +530,13 @@ plot_rec_sd <- cowplot::ggdraw() +
   cowplot::draw_line(x = c(0.2, 0.38), y = c(0.93, 0.93), linewidth = 1, color = "black") +
   cowplot::draw_text("Yellow breast patch", x = 0.75, y = 0.96, size = 14, fontface = "bold", family = "Noto Sans", color = "darkorange") +
   cowplot::draw_line(x = c(0.55, 0.9), y = c(0.93, 0.93), linewidth = 1, color = "black")
-cowplot::save_plot("figures/fig2_sd.jpg", plot_rec_sd, ncol = 1, nrow = 1, base_height = 6, base_width = 18)
+cowplot::save_plot("figures/standardized/fig2_sd.jpg", plot_rec_sd, ncol = 1, nrow = 1, base_height = 6, base_width = 18)
 
 
 
 ###Extra plot
 # Plot displaying results from model on yellow chroma from the yellow breast patch
-yc_hatch_predict_sd = ggeffects::ggpredict(ycr_mod_sd, terms = c("relative_par_load", "hatch_size")) 
+yc_hatch_predict_sd = ggeffects::ggpredict(ycr_mod_sd, terms = c("sd_relative_par_load", "sd_hatch_size")) 
 
 
 moderator_values_rsd <- sort(c(as.numeric(as.character(unique(yc_hatch_predict_sd$group))),
@@ -560,19 +576,23 @@ yc_hatch_lm_sd <- ggplot(as.data.frame(yc_hatch_predict_sd),
         legend.title = element_text(size = 12, face = "bold", hjust = 0.5),
         strip.background = element_blank())
 
-ggsave("figures/fig2_sd_yc_recruit.jpg", yc_hatch_lm_sd, width = 8, height = 6)
+ggsave("figures/standardized/fig2_sd_yc_recruit.jpg", yc_hatch_lm_sd, width = 8, height = 6)
 
 
 
-#Outputs from models (unscaled and scaled)
-##Unscaled
+#Outputs from models (not standardized and standardized)
+##not standardized
+name <- c("model", "effect", "term", "estimate", "std_error", "t_value", "95CI_low", "95CI_up", "group", "nb_groups", "nb_obs")
+
 rec_tab <- dplyr::bind_rows(bbr_tab, buvcr_tab, ybr_tab, yuvcr_tab, ycr_tab) %>% 
-  dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
-  dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
-write.csv(rec_tab, "output_tables/output_prediction1_unsc.csv", row.names = FALSE)
+  dplyr::mutate_at(vars(estimate, std.error, statistic, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
+  dplyr::select(exp_var, effect, term, estimate, std.error, statistic, low95ci, up95ci, group, nb_obs, nb_groups) # Reduce table width to the needed columns
+colnames(rec_tab) <- name
+write.csv(rec_tab, "output_tables/output_prediction1_unst.csv", row.names = FALSE)
 
 ##Scaled
 rec_tab_sd <- dplyr::bind_rows(bbr_tab_sd, buvcr_tab_sd, ybr_tab_sd, yuvcr_tab_sd, ycr_tab_sd) %>% 
-  dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
-  dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
-write.csv(rec_tab_sd, "output_tables/output_prediction1_sc.csv", row.names = FALSE)
+  dplyr::mutate_at(vars(estimate, std.error, statistic, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
+  dplyr::select(exp_var, effect, term, estimate, std.error, statistic, low95ci, up95ci, group, nb_obs, nb_groups) # Reduce table width to the needed columns
+colnames(rec_tab_sd) <- name
+write.csv(rec_tab_sd, "output_tables/output_prediction1_st.csv", row.names = FALSE)
