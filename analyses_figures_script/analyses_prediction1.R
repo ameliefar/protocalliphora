@@ -569,10 +569,10 @@ ggsave("figures/fig2_sd_yc_recruit.jpg", yc_hatch_lm_sd, width = 8, height = 6)
 rec_tab <- dplyr::bind_rows(bbr_tab, buvcr_tab, ybr_tab, yuvcr_tab, ycr_tab) %>% 
   dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
   dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
-write.csv2(rec_tab, "output_tables/output_prediction1_unsc.csv", row.names = FALSE)
+write.csv(rec_tab, "output_tables/output_prediction1_unsc.csv", row.names = FALSE)
 
 ##Scaled
 rec_tab_sd <- dplyr::bind_rows(bbr_tab_sd, buvcr_tab_sd, ybr_tab_sd, yuvcr_tab_sd, ycr_tab_sd) %>% 
   dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
   dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
-write.csv2(rec_tab_sd, "output_tables/output_prediction1_sc.csv", row.names = FALSE)
+write.csv(rec_tab_sd, "output_tables/output_prediction1_sc.csv", row.names = FALSE)

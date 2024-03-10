@@ -736,10 +736,10 @@ ggsave("figures/fig3_buvcsex_sd.jpg", buvc_sex_lm_sd, width = 8, height = 6)
 ad_tab <- dplyr::bind_rows(bba_tab, buvca_tab, yba_tab, yuvca_tab, yca_tab) %>% 
   dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
   dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
-write.csv2(ad_tab, "output_tables/output_prediction2_unsc.csv", row.names = FALSE)
+write.csv(ad_tab, "output_tables/output_prediction2_unsc.csv", row.names = FALSE)
 
 ##standardized
 ad_tab_sd <- dplyr::bind_rows(bba_tab_sd, buvca_tab_sd, yba_tab_sd, yuvca_tab_sd, yca_tab_sd) %>% 
   dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
   dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
-write.csv2(ad_tab_sd, "output_tables/output_prediction2_sc.csv", row.names = FALSE)
+write.csv(ad_tab_sd, "output_tables/output_prediction2_sc.csv", row.names = FALSE)
