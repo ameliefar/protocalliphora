@@ -370,7 +370,6 @@ write.csv(all_tab, "output_tables/output_preanalyses_unsc.csv", row.names = FALS
 
 ##Standardized (scaled)
 all_tab_sd <- dplyr::bind_rows(mass_tab_sd, tars_tab_sd) %>% 
-  dplyr::filter(effect != "ran_pars") %>% # Remove  random effects values
   dplyr::mutate_at(vars(estimate, low95ci, up95ci), ~ round(., digits = 4)) %>% # Round numbers to keep only 4 digits
   dplyr::select(exp_var, term, estimate, low95ci, up95ci, nb_obs, nb_groups) # Reduce table width to the needed columns
 write.csv(all_tab_sd, "output_tables/output_preanalyses_sc.csv", row.names = FALSE)
