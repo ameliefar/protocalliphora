@@ -1,0 +1,15 @@
+"model","effect","term","estimate","std_error","t_value","95CI_low","95CI_up","group","nb_groups","nb_obs"
+"mass","fixed","(Intercept)",10.5953,0.1236,85.704,10.3537,10.8368,NA,NA,NA
+"mass","fixed","relative_par_load",-0.0336,0.011,-3.0572,-0.0552,-0.0121,NA,NA,NA
+"mass","fixed","hatch_size",-0.1365,0.0162,-8.4436,-0.1681,-0.1048,NA,NA,NA
+"mass","fixed","relative_par_load:hatch_size",0.001,0.0018,0.5546,-0.0025,0.0044,NA,NA,NA
+"mass","ran_pars","sd__(Intercept)",0.2974,NA,NA,0.2539,0.3473,"broodID",NA,167
+"mass","ran_pars","sd__(Intercept)",0.2485,NA,NA,0.1743,0.3561,"year",NA,18
+"mass","ran_pars","sd__Observation",0.6525,NA,NA,0.6362,0.669,"Residual",3243,NA
+"tarsus","fixed","(Intercept)",16.2722,0.0884,184.0056,16.0992,16.445,NA,NA,NA
+"tarsus","fixed","relative_par_load",-0.0186,0.0085,-2.1724,-0.0353,-0.0018,NA,NA,NA
+"tarsus","fixed","hatch_size",-0.0214,0.0127,-1.6903,-0.0462,0.0034,NA,NA,NA
+"tarsus","fixed","relative_par_load:hatch_size",0.0021,0.0014,1.5442,-6e-04,0.0048,NA,NA,NA
+"tarsus","ran_pars","sd__(Intercept)",0.183,NA,NA,0.1527,0.2165,"broodID",NA,160
+"tarsus","ran_pars","sd__(Intercept)",0.1021,NA,NA,0.0623,0.1558,"year",NA,18
+"tarsus","ran_pars","sd__Observation",0.474,NA,NA,0.4612,0.4871,"Residual",2766,NA
