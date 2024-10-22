@@ -3,7 +3,8 @@ For each dataset, is provided a general description and the details for each ass
 
 #nestling_condition.csv
 A csv table gatehring the dataset for the analyses of nestling body condition and parasite load (pre-analyses).
-csv table with 8 variables and 3263 observations
+csv table with 8 variables and 2815 observations
+Exclude individuals raised in an experimental brood (cross-fostering, antibiotic treatment, anti-parasitic treatment, egg/nestling addition or removal)
 
 - indID: character; individual identity;
 - broodID: character; nestbox where the individual was laid and fledged; coined from study site ("pir" or "tua") and nestbox number; 
@@ -17,7 +18,8 @@ csv table with 8 variables and 3263 observations
 
 #recruit_color.csv
 A csv table gathering the dataset for the analyses relating plumage colour as a first year breeder to parasite load as a nestling
-csv table with 13 variables and 130 observations
+csv table with 13 variables and 151 observations
+Exclude individuals raised in an experimental brood (cross-fostering, antibiotic treatment, anti-parasitic treatment, egg/nestling addition or removal)
 
 - indID: character; individual identity;
 - sex: character; two possible values: 
@@ -39,7 +41,8 @@ csv table with 13 variables and 130 observations
 
 #adult_color.csv
 A csv table gathering the dataset for the analyses relating plumage colour of breeders to the parasite load of their brood the previous year
-csv table with 14 variables and 551 observations
+csv table with 16 variables and 634 observations.
+Exclude individuals raised in an experimental brood (cross-fostering, antibiotic treatment, anti-parasitic treatment, egg/nestling addition or removal)
 
 - indID: character; individual identity;
 - sex: character; two possible values: 
@@ -47,6 +50,8 @@ csv table with 14 variables and 551 observations
 	- "F" for female
 - min_age: integer; minimum age of the bird (age in year 2 when sampling feathers); varies from 2 to 8
 - broodID: character; nestbox from year 1 (when quantifying parasite load); coined from study site ("pir" or "tua") and nestbox number; 
+- pairID : Identity of the pair from year 1; coined from respectively female ID and male ID
+- mateID : Identity of the mate from year 1
 - year: character; from 2004 to 2021; corresponds to "year 1" when quantifying parasite load
 - hatch_size: integer; number of hatchlings in the brood (from year 1);
 - par_load: integer; parasite load for the whole brood (from year 1);
