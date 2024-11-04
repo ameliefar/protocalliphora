@@ -2,7 +2,7 @@ Folder "data" encompasses all datasets to run the analyses and figures. There ar
 For each dataset, is provided a general description and the details for each associated variable
 
 #nestling_condition.csv
-A csv table gatehring the dataset for the analyses of nestling body condition and parasite load (pre-analyses).
+A csv table gathering the dataset for the analyses of nestling body condition and parasite load (pre-analyses).
 csv table with 8 variables and 2815 observations
 Exclude individuals raised in an experimental brood (cross-fostering, antibiotic treatment, anti-parasitic treatment, egg/nestling addition or removal)
 
@@ -32,7 +32,7 @@ Exclude individuals raised in an experimental brood (cross-fostering, antibiotic
 - relative_par_load: real; ratio of parasite load in the brood divided by number of hatchlings in the brood;
 - spl_period: character; period of feather collection; two possible values:
 	- "C" indicates feathers were collected when potential breeders start constructing nests, in early spring;
-	- "F" indicates feathers were collected when breeders feeding (10 to 15 days old) nestlings, later in spring
+	- "F" indicates feathers were collected when breeders are feeding (10 to 15 days old) nestlings, later in spring
 - BB: real; color variable corresponding to mean brightness from the blue crown
 - BUVC: real; color variable corresponding to UV-chroma from the blue crown
 - YB: real; color variable corresponding to mean brightness from the yellow breast patch
@@ -42,7 +42,7 @@ Exclude individuals raised in an experimental brood (cross-fostering, antibiotic
 #adult_color.csv
 A csv table gathering the dataset for the analyses relating plumage colour of breeders to the parasite load of their brood the previous year
 csv table with 16 variables and 634 observations.
-Exclude individuals raised in an experimental brood (cross-fostering, antibiotic treatment, anti-parasitic treatment, egg/nestling addition or removal)
+Exclude individuals that raised an experimental brood the year before feather collection (cross-fostering, antibiotic treatment, anti-parasitic treatment, egg/nestling addition or removal)
 
 - indID: character; individual identity;
 - sex: character; two possible values: 
@@ -58,7 +58,7 @@ Exclude individuals raised in an experimental brood (cross-fostering, antibiotic
 - relative_par_load: real; ratio of parasite load in the brood divided by number of hatchlings in the brood;
 - spl_period: character; period of feather collection; two possible values:
 	- "C" indicates feathers were collected when potential breeders start constructing nests, in early spring;
-	- "F" indicates feathers were collected when breeders feeding (10 to 15 days old) nestlings, later in spring
+	- "F" indicates feathers were collected when breeders are feeding (10 to 15 days old) nestlings, later in spring
 - BB: real; color variable corresponding to mean brightness from the blue crown
 - BUVC: real; color variable corresponding to UV-chroma from the blue crown
 - YB: real; color variable corresponding to mean brightness from the yellow breast patch
