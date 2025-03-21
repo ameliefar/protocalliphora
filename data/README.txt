@@ -15,6 +15,8 @@ Exclude individuals raised in an experimental brood (cross-fostering, antibiotic
 - tarsus: real; measurement of the tarsus, alternative method following ESF guidelines, usually when the nestling is 15 days old;
 - mass: real; body mass of the nestling when it is about 15 days old
 - laydate : integer; date when the first egg of the clutch was laid, as the number of day since January 1st of the year
+- fledg : integer; number of fledglings in the brood;
+- mort : character; cause of failure of the brood (ABA = abandonned brood, PRE = depredation, NCT = outcome was not controlled)
 
 
 #recruit_color.csv
