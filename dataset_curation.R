@@ -5,49 +5,66 @@
 library(tidyverse)
 library(openxlsx)
 #'
+#'
+#'
+data_path <- "~/GitHub/protocalliphora/data"
+
+#' Unavailable datasets
+#' Main & long-term datasets from which we extracted the data for the analyses - they are not open 
+#' but we provide script to curate these datasets and obtained the 3 datasets used in the analyses
+#' 
+brood # long-term dataset with information related to brood (laying date, clutch size, parent ID, nestling ID, etc.)
+chick # long-term dataset with information related to nestlings (ID, measurements, etc.)
+adult # long-term dataset with information related to parents (ID, date when captured, measurements, age, sex, etc.)
+color # long-term dataset with color variables from feather measurements 
+
+
+
 #'PRE-ANALYSIS : dataset to check the correlation between nestling physical condition and brood parasite load
 
-path <- "//Maison/SIE/Projets/Donnees_Mesange/1-BDD  LA PLUS RECENTE/1- Données (Démo, Morpho,Pous, Obs)/7-BDD en cours de saisie/"
-color_path <- "//Maison/SIE/Projets/Donnees_Mesange/1-BDD  LA PLUS RECENTE/3-BDD_Couleurs_Plumes/BDD_Col_A_JOUR/"
-data_path <- "C:/Users/FARGEVIEILLE/Documents/GitHub/protocalliphora/data"
-brood <- openxlsx::read.xlsx(paste0(path, "/SIE DEMO 1976-2024.xlsx"), detectDates = TRUE) #dataset on brood information
-chick <- openxlsx::read.xlsx(paste0(path, "/SIE POUS 1976-2024.xlsx"), detectDates = TRUE) #dataset related to chick information 
-adult <- openxlsx::read.xlsx(paste0(path, "/SIE MORPH 1976-2024.xlsx"), detectDates = TRUE) #dataset related to breeder information
-col <- readRDS(paste0(color_path, "/bdd_col_v2_ble_22102024.rds")) #datset related to color variables
+# Extract values related to nestlings and brood
+sub_chick <- chick %>% 
+  dplyr::filter(lieu %in% c("pir", "tua") & # select sites
+                  espece == "ble" & # select species
+                  as.numeric(age_plume) > 13 & # select "old" nestlings (based on feather development)
+                  an %in% c(2004:2022) & # select targetted years of parasite sampling
+                  (exp_p != "antibio" | is.na(exp_p))) %>% # Remove particular experiment on nestlings that may affect nestling condition
+  dplyr::mutate(across(c("tarsed", "poids", "age_plume"), ~ as.numeric(.))) %>%  # transform variables to real
+  dplyr::arrange(bague) %>% # order by ring
+  dplyr::group_by(bague) %>% # nest by ring
+  dplyr::mutate(n = n(), # count the number of observations for each individual
+                #' To ensure the largest number of observations with tarsus length, I used a trick
+                #' I've checked first that there were only one (or no) value for tarsus length for each individual
+                tarse = case_when(n == 2 ~ mean(tarsed, na.rm = T),
+                                  TRUE ~ tarsed)) %>% 
+  dplyr::slice(1) %>% #' Keep one observation per individual
+  ungroup() %>% #' unnest
+  dplyr::select(lieu, an, nic, bague, tarse, poids, age_plume, exp_p)  %>% #' select variables of interest
+  left_join(brood %>% # merge with dataset on brood, only keeping individuals in sub_chick object
+              tidyr::pivot_longer(starts_with("pulbag"), names_to = "pulnumber", values_to = "bague", values_drop_na = TRUE) %>% #' transform columns with nestling ID into different rows
+              dplyr::select(lieu, an, nic, bague, proto, pulecl, expou, experience, explique, extnt, date_ponte, pulenv, mort), #' select variables of interest
+            by = "bague") #' merge both objects by nestling ID
 
-# Selecting targeted variables from brood dataset
-sub_brood <- brood %>% 
-  dplyr::filter(lieu %in% c("pir", "tua") & espece == "ble") %>% # Select sites corresponding to "PIRIO" population and species Cyanistes caeruleus
+#' Finalize dataset related to nestling condition, excluding broods with experiments or missing important values (e.g. parasite load)
+data_cond <- sub_chick %>% 
   dplyr::filter_at(vars(proto, pulecl), all_vars(!is.na(.))) %>%  # Select rows with information on parasite load and number of hatchlings
   dplyr::filter(is.na(explique) | !(str_detect(explique, "w|p|P"))) %>% # Exclude cross-fostered broods
   dplyr::filter(extnt != "T") %>% # Exclude nests which were experimentally treated for protocalliphora
-  tidyr::pivot_longer(starts_with("pulbag"), names_to = "pulnumber", values_to = "bague", values_drop_na = TRUE) %>% 
-  dplyr::select(lieu, an, nic, bague, proto, pulecl, expou, experience, explique)
-                   
+  dplyr::filter(if_any(c(tarse, poids), ~(!is.na(.)))) %>% # discard rows with no values for tarsus or mass
+  dplyr::mutate(across(c("proto", "pulecl", "pulenv"), ~ as.integer(.)), # transform variables as integer
+                laydate = lubridate::yday(as.Date(date_ponte, format = "%d/%m/%Y")), # transform laying date as the number of days since January 1st (of the year)
+                relative_par_load = round(proto/pulecl, digits = 2), # create variable "relative parasite load"
+                broodID = paste0(lieu.x, nic.x)) %>% # coin a broodID from site and nestbox number
+  dplyr::select(indID = "bague", broodID, year = "an.x", # select and rename variables when necessary
+                hatch_size = "pulecl", par_load = "proto",
+                relative_par_load, tarsus = "tarse", mass = "poids",
+                laydate, fledg_size = "pulenv") 
 
-data_cond <- chick %>% 
-  dplyr::filter(lieu %in% c("pir", "tua") & espece == "ble" & age_plume > 13) %>% # Select sites, species and chick age (based on feather development)
-  dplyr::select(lieu, an, nic, bague, tarsed, poids, age_plume, exp_p) %>% 
-  dplyr::left_join(sub_brood, by = "bague") %>% # merge with brood dataset
-  dplyr::arrange(dplyr::desc(age_plume)) %>% # the following rows ensure there is no duplicate
-  dplyr::group_by(bague) %>% 
-  dplyr::slice(1) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::filter(an.x %in% c(2004:2022) & !is.na(proto)) %>% # filter targeted years and remove lack of information on parasite load
-  dplyr::filter(if_any(c(tarsed, poids), ~(!is.na(.)))) %>% # discard rows with no values for tarsus or mass
-  dplyr::filter(is.na(exp_p)) %>% # exclude broods with experience on chicks (antibiotics/cross-fostering)
-  dplyr::mutate(indID = as.character(bague),
-                tarsus = as.numeric(tarsed),
-                mass = as.numeric(poids),
-                par_load = as.integer(proto),
-                hatch_size = as.numeric(pulecl),
-                year = as.character(an.x),
-                broodID = paste(lieu.x, nic.x, sep = ""),
-                relative_par_load = round(par_load/hatch_size, digits = 2)) %>% # parasite load per nestling
-  dplyr::select(indID, broodID, year, hatch_size, par_load, relative_par_load, tarsus, mass) 
-
+#' Information related to parasite sampling comes from another file, not reported here
+#' 
 
 write.csv(data_cond, paste0(data_path, "/nestling_condition.csv"), row.names = FALSE)
+
 
 
 #'PREDICTION 1
