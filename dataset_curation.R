@@ -17,7 +17,7 @@ brood # long-term dataset with information related to brood (laying date, clutch
 chick # long-term dataset with information related to nestlings (ID, measurements, etc.)
 adult # long-term dataset with information related to parents (ID, date when captured, measurements, age, sex, etc.)
 color # long-term dataset with color variables from feather measurements 
-
+nestbag # dataset with information related to parasite sampling protocol
 
 
 #'PRE-ANALYSIS : dataset to check the correlation between nestling physical condition and brood parasite load
@@ -44,7 +44,30 @@ sub_chick <- chick %>%
               tidyr::pivot_longer(starts_with("pulbag"), names_to = "pulnumber", values_to = "bague", values_drop_na = TRUE) %>% #' transform columns with nestling ID into different rows
               dplyr::select(lieu, an, nic, bague, proto, pulecl, expou, experience, explique, extnt, date_ponte, pulenv, mort), #' select variables of interest
             by = "bague") #' merge both objects by nestling ID
-
+#'''ADD INFORMATION RELATED TO NESTBAG
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
 #' Finalize dataset related to nestling condition, excluding broods with experiments or missing important values (e.g. parasite load)
 data_cond <- sub_chick %>% 
   dplyr::filter_at(vars(proto, pulecl), all_vars(!is.na(.))) %>%  # Select rows with information on parasite load and number of hatchlings
@@ -61,7 +84,7 @@ data_cond <- sub_chick %>%
                 laydate, fledg_size = "pulenv") 
 
 #' Information related to parasite sampling comes from another file, not reported here
-#' 
+
 
 write.csv(data_cond, paste0(data_path, "/nestling_condition.csv"), row.names = FALSE)
 
