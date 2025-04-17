@@ -16,7 +16,7 @@ Exclude individuals raised in an experimental brood (cross-fostering, antibiotic
 - mass: real; body mass of the nestling when it is about 15 days old
 - laydate : integer; date when the first egg of the clutch was laid, as the number of day since January 1st of the year
 - fledg_size : integer; number of fledglings in the brood;
-- Nestbag : character; type of protocol used to collect parasites:
+- nestbag : character; type of protocol used to collect parasites:
    - "1"" = without placing a cotton nestbag underneath the nest prior to hatching event;
    - "2" = by placing a cotton nestbag underneath the nest prior to hatching event
 
@@ -44,7 +44,7 @@ Exclude individuals raised in an experimental brood (cross-fostering, antibiotic
 - YUVC: real; color variable corresponding to UV-chroma from the yellow breast patch
 - YC: real; color variable corresponding to yellow chroma from the yellow breast patch
 - laydate : integer; date when the first egg of the clutch was laid, as the number of day since January 1st of the year
-- Nestbag : character; type of protocol used to collect parasites:
+- nestbag : character; type of protocol used to collect parasites:
    - "1"" = without placing a cotton nestbag underneath the nest prior to hatching event;
    - "2" = by placing a cotton nestbag underneath the nest prior to hatching event
    
@@ -74,6 +74,6 @@ Exclude individuals raised in an experimental brood (cross-fostering, antibiotic
 - YUVC: real; color variable corresponding to UV-chroma from the yellow breast patch
 - YC: real; color variable corresponding to yellow chroma from the yellow breast patch
 - laydate : integer; date when the first egg of the clutch was laid, as the number of day since January 1st of the year
-- Nestbag : character; type of protocol used to collect parasites:
+- nestbag : character; type of protocol used to collect parasites:
    - "1"" = without placing a cotton nestbag underneath the nest prior to hatching event;
    - "2" = by placing a cotton nestbag underneath the nest prior to hatching event
