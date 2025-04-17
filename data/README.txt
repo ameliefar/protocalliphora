@@ -2,7 +2,7 @@ Folder "data" encompasses all datasets to run the analyses and figures. There ar
 For each dataset, is provided a general description and the details for each associated variable
 
 #nestling_condition.csv
-A csv table gatehring the dataset for the analyses of nestling body condition and parasite load (pre-analyses).
+A csv table gathering the dataset for the analyses of nestling body condition and parasite load (pre-analyses).
 csv table with 11 variables and 3225 observations
 Exclude individuals raised in an experimental brood (cross-fostering, antibiotic treatment, anti-parasitic treatment, egg/nestling addition or removal)
 
