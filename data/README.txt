@@ -61,7 +61,7 @@ Exclude individuals raised in an experimental brood (cross-fostering, antibiotic
 - broodID: character; nestbox from year 1 (when quantifying parasite load); coined from study site ("pir" or "tua") and nestbox number; 
 - pairID : Identity of the pair from year 1; coined from respectively female ID and male ID
 - mateID : Identity of the mate from year 1
-- year: character; from 2005 to 2022; corresponds to "year 1" when quantifying parasite load
+- year: character; from 2004 to 2022; corresponds to "year 1" when quantifying parasite load
 - hatch_size: integer; number of hatchlings in the brood (from year 1);
 - par_load: integer; parasite load for the whole brood (from year 1);
 - relative_par_load: real; ratio of parasite load in the brood divided by number of hatchlings in the brood;
