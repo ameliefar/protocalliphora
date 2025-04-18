@@ -34,6 +34,7 @@ output_nestling_mod <- function(mod, name) {
   #' Extract 95% confidence intervals for estimates along with some distribution around standard deviation for random effect
   
   confint_sd <- as.data.frame(stats::confint(mod)) %>%
+    #' Reorganize names for each group & terms
     dplyr::mutate(term = rownames(.),
                   effect = dplyr::case_when(stringr::str_detect(term, "sig") ~ "ran_pars",
                                             TRUE ~ "fixed"),
