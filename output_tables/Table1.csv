@@ -1,0 +1,17 @@
+"model","effect","term","estimate","std_error","t_value","95CI_low","95CI_up","group","nb_obs","nb_groups"
+"mass","fixed","(Intercept)",1.3037,0.1728,7.5461,0.9659,1.641,,,
+"mass","fixed","relative_par_load",-0.2733,0.1211,-2.257,-0.5103,-0.0365,,,
+"mass","fixed","hatch_size",-0.1999,0.0233,-8.5773,-0.2454,-0.154,,,
+"mass","fixed","laydate",-0.2423,0.0406,-5.9717,-0.3216,-0.1611,,,
+"mass","fixed","relative_par_load:hatch_size",0.0207,0.02,1.0337,-0.0184,0.0599,,,
+"mass","ran_pars","sd__(Intercept)",0.6947,,,0.6468,0.7412,"broodID:year",,604
+"mass","ran_pars","sd__(Intercept)",0.347,,,0.2295,0.5032,"year",,19
+"mass","ran_pars","sd__Observation",0.6177,,,0.6012,0.6349,"Residual",3201,
+"tarsus_length","fixed","(Intercept)",0.3419,0.1543,2.2152,0.0368,0.6418,,,
+"tarsus_length","fixed","relative_par_load",-0.1474,0.1185,-1.2445,-0.3782,0.086,,,
+"tarsus_length","fixed","hatch_size",-0.0524,0.0227,-2.3073,-0.0966,-0.0074,,,
+"tarsus_length","fixed","laydate",-0.1075,0.037,-2.9057,-0.1797,-0.0341,,,
+"tarsus_length","fixed","relative_par_load:hatch_size",0.0168,0.0193,0.8706,-0.021,0.0545,,,
+"tarsus_length","ran_pars","sd__(Intercept)",0.5675,,,0.5167,0.6166,"broodID:year",,537
+"tarsus_length","ran_pars","sd__(Intercept)",0.1767,,,0.0862,0.2822,"year",,19
+"tarsus_length","ran_pars","sd__Observation",0.8087,,,0.7856,0.8329,"Residual",2790,
