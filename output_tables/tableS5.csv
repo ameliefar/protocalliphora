@@ -1,0 +1,15 @@
+"model","terms","vif_values"
+"nestling","relative_par_load",1.02662117211456
+"nestling","hatch_size",1.10052724061813
+"nestling","laydate",1.10448559442823
+"yearling","relative_par_load",1.11746029835526
+"yearling","hatch_size",1.14086612129657
+"yearling","sex",1.03265022937203
+"yearling","period",1.0792516898294
+"yearling","laydate",1.01101182736124
+"adult","relative_par_load",1.01585704101267
+"adult","hatch_size",1.02199121883558
+"adult","sex",1.04185756796004
+"adult","min_age",1.05156908184835
+"adult","period",1.01944050702761
+"adult","laydate",1.00928738539921

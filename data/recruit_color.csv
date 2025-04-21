@@ -1,4 +1,4 @@
-"indID","sex","broodID","year","hatch_size","par_load","relative_par_load","period","BB","BUVC","YB","YUVC","YC","laydate","Nestbag"
+"indID","sex","broodID","year","hatch_size","par_load","relative_par_load","period","BB","BUVC","YB","YUVC","YC","laydate","nestbag"
 3661246,"M","pir126",2011,6,31,5.17,"F",21.049016,0.364522,11.963382,0.255514,0.948591,128,1
 4275670,"M","pir38",2009,6,36,6,"F",18.373357,0.341622,16.16584,0.228372,0.682233,134,1
 4736037,"M","pir129",2004,5,31,6.2,"F",7.711568,0.331535,18.215032,0.207713,0.485504,127,2
